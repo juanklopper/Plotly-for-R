@@ -1,0 +1,191 @@
+---
+title: "Bar charts"
+author: "Dr Juan H Klopper"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd(getwd())
+set.seed(1234)
+library(plotly)
+```
+
+![](KRG_elegant_logo_for_light_BG.png)
+
+## Introduction
+
+Bar charts visualize counts of unique data point values in the sample space of a categorical variable.
+
+## Creating simulated data
+
+```{r}
+cities <- sample(c("NYC", "Boston", "LA", "Seattle"),
+                 100,
+                 replace = TRUE)
+```
+
+```{r}
+table(cities)
+```
+
+```{r}
+as.numeric(table(cities))
+```
+
+```{r}
+names(table(cities))
+```
+
+## Simple bar chart
+
+```{r}
+p1 <- plot_ly(x = names(table(cities)),
+              y = as.numeric(table(cities)),
+              name = "Cities",
+              type = "bar")
+p1
+```
+
+## Adding a title and axes names
+
+```{r}
+p2 <- plot_ly(x = names(table(cities)),
+              y = as.numeric(table(cities)),
+              name = "Cities",
+              type = "bar") %>% 
+  layout(title = "Number of offices in each city",
+         xaxis = list(title = "Cities",
+                      zeroline = FALSE),
+         yaxis = list(title = "Number",
+                      zeroline = FALSE))
+p2
+```
+
+
+## Creating simulated data for a `data.frame`
+
+```{r}
+df <- data.frame(Cities = cities,
+                 Group = sample(c("A", "B"),
+                 100,
+                 replace = TRUE))
+head(df)
+```
+Greate two new `data.frame` object for groups A and B.
+
+```{r}
+groupA <- df %>% filter(Group == "A")
+groupB <- df %>% filter(Group == "B")
+```
+
+```{r}
+table(groupA$Cities)
+```
+
+```{r}
+names(table(groupA$Cities))
+```
+
+```{r}
+as.numeric(table(groupA$Cities))
+```
+
+```{r}
+gBarChart <- data.frame(Cities = names(table(groupA$Cities)),
+                      GroupA = as.numeric(table(groupA$Cities)),
+                      GroupB = as.numeric(table(groupB$Cities)))
+head(gBarChart)
+```
+
+
+## Grouped bar chart
+
+```{r}
+p3 <- plot_ly(gBarChart,
+              x = ~Cities,
+              y = ~GroupA,
+              type = "bar",
+              name = "Group A") %>% 
+  add_trace(y = ~GroupB,
+            name = "Group B") %>% 
+  layout(yaxis = list(title = "Cities"),
+         barmode = "group")
+p3
+```
+
+## Stacked bar chart
+
+```{r}
+p4 <- plot_ly(gBarChart,
+              x = ~Cities,
+              y = ~GroupA,
+              type = "bar",
+              name = "group A") %>% 
+  add_trace(y = ~GroupB,
+            name = "Group B") %>% 
+  layout(yaxis = list(title = "Cities"),
+         barmode = "stack")
+p4
+```
+
+## Changing the color
+
+```{r}
+p5 <- plot_ly(x = names(table(cities)),
+              y = as.numeric(table(cities)),
+              name = "Cities",
+              type = "bar",
+              marker = list(color = "rgba(255, 70, 0, 0.7)",
+                            line = list(color = "rgba(0, 0, 0, 0.5)",
+                                        width = 1.5))) %>% 
+  layout(title = "Number of offices per city",
+         xaxis = list(title = "Cities",
+                      zeroline = FALSE),
+         yaxis = list(title = "Number",
+                      zeroline = FALSE))
+p5
+```
+
+### Changing the text angle on the $x$ axis
+
+The `tickangle =` argument in the `xaxis` ragument of the `layout` command can change the angle of text.
+
+```{r}
+p6 <- plot_ly(x = names(table(cities)),
+              y = as.numeric(table(cities)),
+              name = "Cities",
+              type = "bar",
+              marker = list(color = "rgba(255, 70, 0, 0.7)",
+                            line = list(color = "rgba(0, 0, 0, 0.5)",
+                                        width = 1.5))) %>% 
+  layout(title = "Number of offices per city",
+         xaxis = list(title = "Cities",
+                      zeroline = FALSE,
+                      tickangle = -20),
+         yaxis = list(title = "Number",
+                      zeroline = FALSE))
+p6
+```
+
+## Specifying the color of each bar
+
+Color can be specified of each bar.
+
+```{r}
+p7 <- plot_ly(x = names(table(cities)),
+              y = as.numeric(table(cities)),
+              name = "Cities",
+              type = "bar",
+              marker = list(color = c("rgba(150, 150, 150, 0.7)",
+                                      "rgba(150, 150, 150, 0.7",
+                                      "rgba(255, 20, 0, 0.7)",
+                                      "rgba(150, 150, 150, 0.7"))) %>% 
+  layout(title = "Number of offices per city",
+         xaxis = list(title = "Cities",
+                      zeroline = FALSE),
+         yaxis = list(title = "Number",
+                      zeroline = FALSE))
+p7
+```
+
