@@ -1,0 +1,131 @@
+---
+title: "Histograms using Plotly for R"
+author: "Dr Juan H Klopper"
+output: html_document
+---
+
+```{r Setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd(getwd())
+set.seed(1234)
+library(plotly)
+library(dplyr)
+```
+
+<style type="text/css">
+h1 {
+    color:#1a2451;
+}
+h2 {
+    color:#ffbd4a;
+}
+h3 {
+    color:#1a2451;
+}
+</style>
+
+![](KRG_elegant_logo_for_light_BG.png)
+
+## Introduction
+
+Histograms are used to visualize the spread in the data point values of a continuous numerical variable.  The `Plotly` histogram divides the numerical variable up into equally sized bins, ranging from the lowest to the highest value for the variable.  It then counts the number of data point values in each bin.
+
+The histogram can also be normalized so as to show a frequency distribution.
+
+## A simple histogram
+
+The code below creates a variable called `wcc`.  It takes $200$ data point values from a normal distribution with $\mu = 15$ and $\sigma = 4$.
+
+```{r Creating WCC}
+wcc <- rnorm(100,
+             15, 4)
+summary(wcc)
+```
+
+A simple histogram is generated below.
+
+```{r Simple histogram}
+p1 <- plot_ly(x = ~wcc,
+              type = "histogram")
+p1
+```
+
+## Adding title
+
+The `layout()` command added in the pipeline creates titles.
+
+```{r Adding title}
+p2 <- plot_ly(x = ~wcc,
+              type = "histogram") %>% 
+  layout(title = "Histogram of white cell count",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p2
+```
+
+## Normalized histogram
+
+A normalized histogram shows the frequency distribution.  It divides the count for each bin by the total number of data point values in the sample.  It is achieved by using the `histnorm =` argument.
+
+```{r Frequency distribution}
+p3 <- plot_ly(x = ~wcc,
+              type = "histogram",
+              histnorm = "probability") %>% 
+  layout(title = "Frequency distribution of white cell count",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "Frequency",
+                      zeroline = FALSE))
+p3
+```
+
+## Horizontal histogram
+
+Flipping the plot to horizontal is as easy as setting the variable, `wcc` to the `y =` argument.  Remember to change the axes titles as well.
+
+```{r Horizontal histogram}
+p4 <- plot_ly(y = ~wcc,
+              type = "histogram",
+              histnorm = "probability") %>% 
+  layout(title = "Frequency distribution of white cell count",
+         yaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         xaxis = list(title = "Frequency",
+                      zeroline = FALSE))
+p4
+```
+
+## Displaying a histogram for more than one categorical group
+
+A histogram for the same  variable can be shown for more than one group.  The code below creates a `data.frame` and then splits this into two `data.frame` objects using the `dplyr` library.
+
+```{r Creating data.frames}
+df <- data.frame(Group = sample(c("A", "B"),
+                                200,
+                                replace = TRUE),
+                 WCC = wcc)
+groupA <- df %>% filter(Group == "A")
+groupB <- df %>% filter(Group == "B")
+```
+
+The code below creates a histogram of the `WCC` variable for each group.  Since an overlay is going to occur, the opacity is set using the `alpha =` argument.  Each individual histogram is added using the `add_histogram()` command.  The `barmode =` argument is added to the `layout()` command.
+
+```{r Overlay histogram}
+p5 <- plot_ly(alpha = 0.7) %>% 
+  add_histogram(x = ~groupA$WCC,
+                name = "Group A") %>% 
+  add_histogram(x = ~groupB$WCC,
+                name = "GroupB") %>% 
+  layout(barmode = "overlay",
+         title = "Histogram of white cell count for groups A and B",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p5
+```
+
+
+
