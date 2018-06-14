@@ -1,0 +1,128 @@
+---
+title: "Scatter plots using Plotly for R"
+author: "Dr Juan H Klopper"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd(getwd())
+library(plotly)
+library(dplyr)
+```
+
+<style type="text/css">
+h1 {color:#1a2451;}
+h2 {color:#ffbd4a;}
+h3 {color:#1a2451;}
+</style>
+
+![](KRG_elegant_logo_for_light_BG.png)
+
+## Introduction
+
+Scatter plots visualize the relationship between numerical variables.  These variables are noted as pairs, one eahc for every subject (row) in a dataset.
+It is possible to visualize a third variable
+
+## Creating simulated data
+
+```{r}
+set.seed(123)
+age <- runif(n = 200,
+            min = 15,
+            max = 85)
+wcc <- round(rnorm(n = 200,
+                  mean = 15,
+                  sd = 4),
+            digits = 1)
+crp <- round((wcc + runif(n = 200,
+                          min = -2,
+                          max = 10)) / 10,
+             digits = 1)
+sBP <- round(runif(n = 200,
+                   min = 70,
+                   max = 180),
+             digits = 0)
+group <- sample(c("Treatment group", "Control group"),
+                size = 200,
+                replace = TRUE)
+df <- data.frame("Age" = age,
+                 "WCC" = wcc,
+                 "CRP" = crp,
+                 "SBP" = sBP,
+                 "Group" = group)
+head(df)
+```
+
+## Simple scatter plot
+
+```{r}
+p1 <- plot_ly(data = df,
+              x = ~WCC,
+              y = ~CRP,
+              type = "scatter",
+              mode = "markers",
+              marker = list(size = 12)) %>% 
+  layout(title = "Correlation between WCC and CRP",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "C-Reactive Protein",
+                      zeroline = FALSE))
+p1
+```
+
+## Scatter plot by group
+
+```{r}
+p2 <- plot_ly(data = df,
+              x = ~WCC,
+              y = ~CRP,
+              color = ~Group,
+              colors = c("deepskyblue", "orange"),
+              type = "scatter",
+              mode = "markers",
+              marker = list(size = 12)) %>% 
+  layout(title = "Correlation between WCC and CRP",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "C-Reactive Protein",
+                      zeroline = FALSE))
+p2
+```
+
+## Adding a third variable as a color scale
+
+```{r}
+p3 <- plot_ly(data = df,
+              x = ~WCC,
+              y = ~CRP,
+              color = ~Age,
+              type = "scatter",
+              mode = "markers",
+              marker = list(size = 12)) %>% 
+  layout(title = "Correlation between WCC and CRP",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "C-Reactive Protein",
+                      zeroline = FALSE))
+p3
+```
+
+## Adding a fourth variable by marker size (bubble chart)
+
+```{r}
+p4 <- plot_ly(data = df,
+              x = ~WCC,
+              y = ~CRP,
+              color = ~Age,
+              size = round(sBP / 10, digits = 0),
+              type = "scatter",
+              mode = "markers") %>% 
+  layout(title = "Correlation between WCC and CRP",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "C-Reactive Protein",
+                      zeroline = FALSE))
+p4
+```
+
