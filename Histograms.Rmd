@@ -1,7 +1,10 @@
 ---
-title: "Histograms using Plotly for R"
+title: "Control color in histograms using Plotly for R"
 author: "Dr Juan H Klopper"
-output: html_document
+output:
+  html_document:
+    toc: true
+    number_sections: false
 ---
 
 ```{r Setup, include=FALSE}
@@ -24,9 +27,11 @@ h3 {
 }
 </style>
 
-![](KRG_elegant_logo_for_light_BG.png)
+![](KRG elegant logo for light BG.png)
 
 ## Introduction
+
+(This tutorial extends a previous tutorial on histograms by adding more information about controlling color.)
 
 Histograms are used to visualize the spread in the data point values of a continuous numerical variable.  The `Plotly` histogram divides the numerical variable up into equally sized bins, ranging from the lowest to the highest value for the variable.  It then counts the number of data point values in each bin.
 
@@ -38,7 +43,8 @@ The code below creates a variable called `wcc`.  It takes $200$ data point value
 
 ```{r Creating WCC}
 wcc <- rnorm(100,
-             15, 4)
+             mean = 15,
+             sd = 4)
 summary(wcc)
 ```
 
@@ -50,11 +56,11 @@ p1 <- plot_ly(x = ~wcc,
 p1
 ```
 
-## Adding title
+## Adding a title axes labels
 
 The `layout()` command added in the pipeline creates titles.
 
-```{r Adding title}
+```{r Adding title and labels}
 p2 <- plot_ly(x = ~wcc,
               type = "histogram") %>% 
   layout(title = "Histogram of white cell count",
@@ -83,7 +89,7 @@ p3
 
 ## Horizontal histogram
 
-Flipping the plot to horizontal is as easy as setting the variable, `wcc` to the `y =` argument.  Remember to change the axes titles as well.
+Flipping the plot to the horizontal is as easy as setting the variable, `wcc` to the `y =` argument.  Remember to change the axes titles as well.
 
 ```{r Horizontal histogram}
 p4 <- plot_ly(y = ~wcc,
@@ -127,5 +133,72 @@ p5 <- plot_ly(alpha = 0.7) %>%
 p5
 ```
 
+## Changing the colors of the bars
 
+The `Plotly` default is to print the _markers_ in blue, be they bars or points.  If a second color is required, orange is chosen.  These colors can be changed.
 
+It is also difficult at times to distinguish the different bars that make up a histogram.  Since histograms represent continuous numerical variables, there are no gaps between the bars as with a bar chart (which represents discrete or categorical variable counts).
+
+In the code chunk below, we choose a teal color for the bar and a dark gray for the border.  This _monochrome_ chart is more suitable for submission for publication that the colorful charts that we create for the web.  Since most journals are now online, hopefully this dreary look will disappear.
+
+```{r Monochrome histogram}
+p6 <- plot_ly(x = ~wcc,
+              type = "histogram",
+              histnorm = "probability",
+              marker = list(color = "lightgray",
+                            line = list(color = "darkgray",
+                                        width = 2))) %>% 
+  layout(title = "Frequency distribution of white cell count",
+         yaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         xaxis = list(title = "Frequency",
+                      zeroline = FALSE))
+p6
+```
+
+We can plot more than one histogram trace on the same plot and color them separately as well.  In the code chunk below, we lower the opacity of the second layer so as to be able to see the bottom layers bars.
+
+```{r Overlay histogram with different colors}
+p7 <- plot_ly() %>% 
+  add_histogram(x = ~groupA$WCC,
+                name = "Group A",
+                marker = list(color = "teal",
+                            line = list(color = "darkgray",
+                                        width = 2))) %>% 
+  add_histogram(x = ~groupB$WCC,
+                opacity = 0.7,
+                name = "GroupB",
+                marker = list(color = "orange",
+                            line = list(color = "darkgray",
+                                        width = 2))) %>% 
+  layout(barmode = "overlay",
+         title = "Histogram of white cell count for groups A and B",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p7
+```
+
+Using `"rgba()"` (red, green, blue, and opacity) and `"rgb()"` (red, green, and blue) values allows for more control over the colors and their opacity.
+
+```{r Overlay histogram with different rgba specified colors}
+p8 <- plot_ly() %>% 
+  add_histogram(x = ~groupA$WCC,
+                name = "Group A",
+                marker = list(color = "rgba(255, 165, 0, 1.0)",
+                            line = list(color = "rgb(169, 169, 169)",
+                                        width = 2))) %>% 
+  add_histogram(x = ~groupB$WCC,
+                name = "GroupB",
+                marker = list(color = "rgba(150, 150, 150, 0.7)",
+                            line = list(color = "rgb(169, 169, 169)",
+                                        width = 2))) %>% 
+  layout(barmode = "overlay",
+         title = "Histogram of white cell count for groups A and B",
+         xaxis = list(title = "White cell count",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p8
+```
