@@ -1,0 +1,236 @@
+---
+title: "Box-and-whisker using Plotly for R"
+author: "Dr Juan H Klopper"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+---
+
+```{r Setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd(getwd())
+library(tibble)
+library(DT)
+library(plotly)
+library(dplyr)
+```
+
+<style type="text/css">
+h1 {
+    color:#1a2451;
+}
+h2 {
+    color:#ffbd4a;
+}
+h3 {
+    color:#1a2451;
+}
+</style>
+
+![](KRG elegant logo for light BG.png)
+
+## Introduction
+
+Box-and-whisker plots give a visual indication of the spread of data point values for a continuous numerical variable.
+
+The central box has as its upper margin (on the $y$-axis) the third quarterly value and as it lower margin the first quarterly value.  A central bar in the box shows the median.
+
+The whisker stretch up and down from the ends of the box and can terminate at the minimum and maximum values.  Some plots, though terminate their whiskers at $1.5$ times the IQR above and below the quartile values, so as to show any potential outliers beyond them.
+
+## Simulating some data
+
+In this tutorial we will be working with some simulated numerical and categorical variables.  In the code chunk below we create these and add them to a tibble.
+
+A tibble is a more _modern_ version of the inbuilt R `data.frame`.  We can print it to the screen when we render this RMD file using `knitr`.  This is done with the `DT` package.
+
+The numerical variable will be that of income.  We will create a categorical variable for career stage and country.
+
+```{r Creating simulated data}
+set.seed(1234)
+# Create three varaible
+income <- round(rnorm(500,
+                      mean = 10000,
+                      sd = 1000),
+                digits = 2)
+stage <- sample(c("Early",
+                  "Mid",
+                  "Late"),
+                500,
+                replace = TRUE)
+country <- sample(c("USA",
+                    "Canada"),
+                  500,
+                  replace = TRUE)
+# Create tibble
+df <- tibble(Income = income,
+             Stage = stage,
+             Country = country)
+# Print a data table
+datatable(df)
+```
+
+## Simple box-and-whisker plot
+
+In the code chunk below is a simple box-and-whisker plot of the income for all the simulated survey members.
+
+```{r Box plot of income}
+p1 <- plot_ly(type = "box",
+              y = ~Income,
+              data = df,
+              name = "All income") %>% 
+  layout(title = "Overall income",
+         xaxis = list(title = "",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p1
+```
+
+## Horizontal plots
+
+Horizontal box plots are easy to create, we simply swap the axes.
+
+```{r Horizontal box plot of income}
+p2 <- plot_ly(type = "box",
+              x = ~Income,
+              data = df,
+              name = "All income") %>% 
+  layout(title = "Overall income",
+         yaxis = list(title = "",
+                      zeroline = FALSE),
+         xaxis = list(title = "Income",
+                      zeroline = FALSE))
+p2
+```
+
+## Adding all the data point values
+
+We can add all the data point values.  Since there are many with potential overlap, we add a bit of hitter.  The jitter can also be offset so as not to overlay the box.
+
+```{r Box plot wth all the data point value}
+p3 <- plot_ly(type = "box",
+              y = ~Income,
+              data = df,
+              name = "All income",
+              boxpoints = "all",
+              jitter = 0.3,
+              pointpos = -2) %>% 
+  layout(title = "Overall income",
+         xaxis = list(title = "",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p3
+```
+
+## Adding a mean and a standard deviation
+
+As mentioned the central box shows a line for the median.  The mean can also be added.  This is done by adding the `boxmean = TRUE` argument.  If the argument is set to `boxmean = "sd`, then both a mean and standard deviation is indicated.
+
+```{r Adding a mean}
+p4 <- plot_ly(type = "box",
+              y = ~Income,
+              data = df,
+              name = "All income",
+              boxmean = "sd") %>% 
+  layout(title = "Overall income",
+         xaxis = list(title = "",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p4
+```
+
+
+## Creating more than one box in a box plot
+
+We can use the `color = ` argument to split the numerical variable according to one of the categorical variables.
+
+```{r Creating three box plots according to the Stage variable}
+p5 <- plot_ly(df,
+              y = ~Income,
+              color = ~Stage,
+              type = "box") %>% 
+  layout(title = "Income by career stage",
+         xaxis = list(title = "Stage",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p5
+```
+
+```{r Creating three box plots according to the Stage variable, grouped by country}
+p6 <- plot_ly(df,
+              x = ~Country,
+              y = ~Income,
+              color = ~Stage,
+              type = "box") %>% 
+  layout(boxmode = "group",
+         title = "Income by career stage",
+         xaxis = list(title = "Country",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p6
+```
+
+## Changing the outlier marker shape
+
+There are many different shapes to choose from.  Below we make the outliers square.
+
+```{r Changing outlier marker shape}
+p7 <- plot_ly(type = "box",
+              y = ~Income,
+              data = df,
+              name = "All income",
+              marker = list(symbol = "square-dot")) %>% 
+  layout(title = "Overall income",
+         xaxis = list(title = "",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p7
+```
+
+## Box color
+
+The color of the box and its outline can be selected.
+
+```{r Box fill and outline colors}
+p8 <- plot_ly(type = "box",
+              y = ~Income,
+              data = df,
+              name = "All income",
+              marker = list(symbol = "square-dot"),
+              fillcolor = "pink",
+              line = list(color = "gray",
+                          width = 2)) %>% 
+  layout(title = "Overall income",
+         xaxis = list(title = "",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p8
+```
+
+## Choosing a color set
+
+There are many color sets to choose from.  Here we use `Set(3)`.
+
+```{r Coosing a color set}
+p7 <- plot_ly(type = "box",
+              y = ~Income,
+              color = ~Country,
+              data = df,
+              marker = list(symbol = "square-dot"),
+              colors = "Set3") %>% 
+  layout(title = "Overall income",
+         xaxis = list(title = "Country",
+                      zeroline = FALSE),
+         yaxis = list(title = "Income",
+                      zeroline = FALSE))
+p7
+```
+
+

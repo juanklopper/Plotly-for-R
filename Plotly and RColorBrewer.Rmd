@@ -1,0 +1,298 @@
+---
+title: "Plotly and RColorBrewer"
+author: "Dr Juan H Klopper"
+output:
+  html_document:
+    toc: true
+    number_sections: false
+---
+
+```{r Setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd(getwd())
+library(tibble)
+library(DT)
+library(plotly)
+library(dplyr)
+library(RColorBrewer)
+```
+
+<style type="text/css">
+h1 {
+    color:#1a2451;
+}
+h2 {
+    color:#ffbd4a;
+}
+h3 {
+    color:#1a2451;
+}
+</style>
+
+![](KRG elegant logo for light BG.png)
+
+## Introduction
+
+By default `Plotly` has some truly awesome plot and graph colors.  These are also infinitely customizable.
+
+In this tutorial, we will have a look at the different ways to customize the colors and also how to use the `RColorBrewer` package to change plot colors.
+
+## Creating simulated data
+
+In the code chunk below, we create a string vector containing a list of $200$ cities from a sample space of seven unique data point values.  Try and spot the odd one out!
+
+```{r One-hundred random cities}
+set.seed(123)
+cities <- sample(c("NYC", "Boston", "LA", "Seattle", "SF", "Miami", "Cape Town"),
+                 200,
+                 replace = TRUE)
+```
+
+The `table()` function will display a list of this nominal categorical variable and a count of the sample space elements.
+
+```{r Table of city names and counts}
+table(cities)
+```
+
+The `names()` function will return only the elements in the sample space of ur nominal categorical variable.  We can store this in an appropriately named computer variable.
+
+```{r City names only}
+city.names <- names(table(cities))
+city.names
+```
+
+The `as.numeric()` function will return only the counts.  We will store this information too.
+
+```{r Counts}
+city.counts <- as.numeric(table(cities))
+city.counts
+```
+
+## Color choices
+
+### Default color bar chart
+
+These two vectors will allow us to create a simple bar chart, ideal for nominal categorical variables.
+
+```{r}
+p1 <- plot_ly() %>% 
+  add_trace(type = "bar",
+            x = city.names,
+            y = city.counts) %>% 
+  layout(title = "Cities",
+         xaxis = list(title = "City",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p1
+```
+
+### rgb and rgba
+
+We see the typical _deep sky blue_ default color.  By adding the `marker` argument, we can stipulate the bar and the edge color.  In the first example, we specify the colors by `rgb` (red, green, and blue) value.  Each value can range from $0$ to $255$, that is minimum to maximum intensity.  Mixing the values allows us to create many, many colors.  In the code chunk below, we go for a gray fill and a very dark gray border of $2$ pixels.
+
+```{r Specifying the colors by rgb}
+p2 <- plot_ly() %>% 
+  add_trace(type = "bar",
+            x = city.names,
+            y = city.counts,
+            marker = list(color = "rgb(195, 195, 195)",
+                            line = list(color = "rgb(20, 20, 20)",
+                                        width = 2))) %>% 
+  layout(title = "Cities",
+         xaxis = list(title = "City",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p2
+```
+
+The `rgba` value allows us to add an opacity value in the range $0$ to $1$, the former being fully transparent and the latter indicating no transparency at all.  In the code chunk below we go for a transparent red fill.
+
+```{r Specifying the colors by rgba}
+p3 <- plot_ly() %>% 
+  add_trace(type = "bar",
+            x = city.names,
+            y = city.counts,
+            marker = list(color = "rgba(255, 0, 0, 0.6)",
+                            line = list(color = "rgb(20, 20, 20)",
+                                        width = 2))) %>% 
+  layout(title = "Cities",
+         xaxis = list(title = "City",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p3
+```
+
+### Individual rgb colors
+
+Since we know that there are seven bars, we can specify individual colors for each.  In the code below, LA and SF are colored red and the rest are silver.  All have a transparency level of $0.7$.
+
+```{r Specifying individual colors by rgba}
+p4 <- plot_ly() %>% 
+  add_trace(type = "bar",
+            x = city.names,
+            y = city.counts,
+            marker = list(color = c("rgba(192, 192, 192, 0.7)",
+                                    "rgba(192, 192, 192, 0.7)",
+                                    "rgba(255, 0, 0, 0.7)",
+                                    "rgba(192, 192, 192, 0.7)",
+                                    "rgba(192, 192, 192, 0.7)",
+                                    "rgba(192, 192, 192, 0.7)",
+                                    "rgba(255, 0, 0, 0.7)"))) %>% 
+  layout(title = "Cities",
+         xaxis = list(title = "City",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p4
+```
+
+### Colors by name
+
+Instead of `rgb` and `rgba` values, we can also use official HTML names.  The opacity needs to be a vector of values.  The color names are available at https://www.w3.org/TR/css-color-3/#svg-color 
+
+```{r Specifying the colors by name}
+p5 <- plot_ly() %>% 
+  add_trace(type = "bar",
+            x = city.names,
+            y = city.counts,
+            marker = list(color = c("silver",
+                                    "silver",
+                                    "red",
+                                    "silver",
+                                    "silver",
+                                    "silver",
+                                    "red"),
+                          opacity = rep(0.7, 7))) %>% 
+  layout(title = "Cities",
+         xaxis = list(title = "City",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p5
+```
+
+### Hexademical colors
+
+Hex, hsl, and hsv value will also work.  In the code chunk below is an example of hexadecimal values.
+
+```{r Specifying the colors by hex value}
+p6 <- plot_ly() %>% 
+  add_trace(type = "bar",
+            x = city.names,
+            y = city.counts,
+            marker = list(color = c("#C0C0C0",
+                                    "#C0C0C0",
+                                    "#FF0000",
+                                    "#C0C0C0",
+                                    "#C0C0C0",
+                                    "#C0C0C0",
+                                    "#FF0000"),
+                          opacity = rep(0.7, 7))) %>% 
+  layout(title = "Cities",
+         xaxis = list(title = "City",
+                      zeroline = FALSE),
+         yaxis = list(title = "Count",
+                      zeroline = FALSE))
+p6
+```
+
+## Using named color palettes
+
+In the code chunk below we create a `tibble` object to serve as data for the rest of this tutorial.  It is saved in the __df__ computer variable, which we print out to the screen as a `datatable` from the `DT` package.
+
+```{r Creating a tibble}
+df <- tibble(
+  City = cities,
+  Sale = round(rnorm(length(cities),
+                      mean = 100,
+                      sd = 10),
+                digits = 1)
+  )
+datatable(df)
+```
+
+### A box-and-whisker chart with default colors
+
+A box-and-whisker chart is ideal to visualize the spread of a numerical variable among one or more sample space elements of a categorical variable.  
+
+```{r Box plot with default colors}
+p7 <- plot_ly() %>% 
+  add_trace(data = df,
+            y = ~Sale,
+            color = ~City,
+            type = "box") %>% 
+  layout(title = "Sales per city",
+         xaxis = list(title = "City"))
+p7
+```
+
+### Using a color palettes
+
+There are several color sets available in `Plotly`.  These include _Set1 Set2 Set3 Pastel1 Pastel2 Paired Dark2 Accent_ qualitative palettes, many sequential light to dark palettes, and even more dark to light to dark palettes.  Below are examples of _Dark2_ and _BrBG_.
+
+```{r Using the Dark2 palette}
+p8 <- plot_ly() %>% 
+  add_trace(data = df,
+            y = ~Sale,
+            color = ~City,
+            colors = "Dark2",
+            type = "box") %>% 
+  layout(title = "Sales per city",
+         xaxis = list(title = "City"))
+p8
+```
+
+```{r Using the BrBG palette}
+p9 <- plot_ly() %>% 
+  add_trace(data = df,
+            y = ~Sale,
+            color = ~City,
+            colors = "BrBG",
+            type = "box") %>% 
+  layout(title = "Sales per city",
+         xaxis = list(title = "City"))
+p9
+```
+
+The `RColorBrewer` package makes the ColorBrewer colors available in R.  From the R documentation page for this package: _There are 3 types of palettes, sequential, diverging, and qualitative. 1. Sequential palettes are suited to ordered data that progress from low to high. Lightness steps dominate the look of these schemes, with light colors for low data values to dark colors for high data values. 2. Diverging palettes put equal emphasis on mid-range critical values and extremes at both ends of the data range. The critical class or break in the middle of the legend is emphasized with light colors and low and high extremes are emphasized with dark colors that have contrasting hues. 3. Qualitative palettes do not imply magnitude differences between legend classes, and hues are used to create the primary visual differences between classes. Qualitative schemes are best suited to representing nominal or categorical data. The sequential palettes names are Blues BuGn BuPu GnBu Greens Greys Oranges OrRd PuBu PuBuGn PuRd Purples RdPu Reds YlGn YlGnBu YlOrBr YlOrRd All the sequential palettes are available in variations from 3 different values up to 9 different values. The diverging palettes are BrBG PiYG PRGn PuOr RdBu RdGy RdYlBu RdYlGn Spectral All the diverging palettes are available in variations from 3 different values up to 11 different values. For qualitative palettes, the lowest number of distinct values available always is 3, but the largest number is different for different palettes. It is given together with the palette names in the following table. lr{ Accent 8 Dark2 8 Paired 12 Pastel1 9 Pastel2 8 Set1 9 Set2 8 Set3 12 }_
+
+The ColorBrewer website is at http://colorbrewer2.org  In the code chunk below we use the `Paired` color palette.
+
+```{r Using RColorBrewer}
+p10 <- plot_ly() %>% 
+  add_trace(data = df,
+            y = ~Sale,
+            color = ~City,
+            colors = brewer.pal(length(names(table(cities))),
+                                "Paired"),
+            type = "box") %>% 
+  layout(title = "Sales per city",
+         xaxis = list(title = "City"))
+p10
+```
+
+The number of colors vary between $8$ and $12$.  The `RColorBrewer` package allows for many more colors with the `colorRampPalette()` function.  The code chunk below shows a sine curve with $41$ colored markers.
+
+```{r The colorRampPalette function}
+x <- seq(from = -2,
+         to = 2,
+         b = 0.1)
+y <- sin(x)
+
+p11 <- plot_ly() %>% 
+  add_trace(type = "scatter",
+            x = ~x,
+            y = ~y,
+            mode = "markers",
+            marker = list(size = 10,
+                          color = colorRampPalette(brewer.pal(10,"Spectral"))(41))) %>% 
+  layout(title = "Multicolored sine curve",
+         xaxis = list(title = "x-axis"),
+         yaxis = list(title = "y-axis"))
+p11
+```
+
+Enjoy your colored plots and graphs with `Plotly` for R.
