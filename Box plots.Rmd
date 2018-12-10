@@ -1,5 +1,5 @@
 ---
-title: "Box-and-whisker using Plotly for R"
+title: "Box-and-whisker plots using Plotly for R"
 author: "Dr Juan H Klopper"
 output:
   html_document:
@@ -9,11 +9,9 @@ output:
 
 ```{r Setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-setwd(getwd())
 library(tibble)
 library(DT)
 library(plotly)
-library(dplyr)
 ```
 
 <style type="text/css">
@@ -34,38 +32,39 @@ h3 {
 
 Box-and-whisker plots give a visual indication of the spread of data point values for a continuous numerical variable.
 
-The central box has as its upper margin (on the $y$-axis) the third quarterly value and as it lower margin the first quarterly value.  A central bar in the box shows the median.
+The central box has as its upper margin (on the $y$-axis) the third quartile value and as it lower margin the first quartile value.  A central bar in the box shows the median.
 
 The whisker stretch up and down from the ends of the box and can terminate at the minimum and maximum values.  Some plots, though terminate their whiskers at $1.5$ times the IQR above and below the quartile values, so as to show any potential outliers beyond them.
 
 ## Simulating some data
 
-In this tutorial we will be working with some simulated numerical and categorical variables.  In the code chunk below we create these and add them to a tibble.
+In this tutorial we will be working with some simulated numerical and categorical variable data point values.  In the code chunk below we create these and add them to a tibble.
 
 A tibble is a more _modern_ version of the inbuilt R `data.frame`.  We can print it to the screen when we render this RMD file using `knitr`.  This is done with the `DT` package.
 
-The numerical variable will be that of income.  We will create a categorical variable for career stage and country.
+The numerical variable will be that of _income_.  We will create a categorical variable for _career stage_ and _country_.
 
 ```{r Creating simulated data}
+# Seeding the pseudo-random number generator for reproducible results
 set.seed(1234)
 # Create three varaible
-income <- round(rnorm(500,
-                      mean = 10000,
-                      sd = 1000),
-                digits = 2)
-stage <- sample(c("Early",
+income <- round(rnorm(500,  # 500 random data point values
+                      mean = 10000,  # mean of 100
+                      sd = 1000),  # standard deviation of 1000
+                digits = 2)  # round the random values to two decimal points
+stage <- sample(c("Early",  
                   "Mid",
-                  "Late"),
-                500,
-                replace = TRUE)
+                  "Late"),  # sample space of the stage variable
+                500,  # 500 random data point values
+                replace = TRUE)  # replace values for reselection
 country <- sample(c("USA",
-                    "Canada"),
-                  500,
-                  replace = TRUE)
+                    "Canada"),  # sample space of the country variabe
+                  500,  # 500 random data point values
+                  replace = TRUE)  # replace values for reselection
 # Create tibble
-df <- tibble(Income = income,
-             Stage = stage,
-             Country = country)
+df <- tibble(Income = income,  # create an Income variable for the income data point values
+             Stage = stage,  # create a Stage variable for the stage data point values
+             Country = country)  # create a Country variable for the country data point values
 # Print a data table
 datatable(df)
 ```
@@ -128,7 +127,7 @@ p3
 
 As mentioned the central box shows a line for the median.  The mean can also be added.  This is done by adding the `boxmean = TRUE` argument.  If the argument is set to `boxmean = "sd`, then both a mean and standard deviation is indicated.
 
-```{r Adding a mean}
+```{r Adding a mean and standard deviation}
 p4 <- plot_ly(type = "box",
               y = ~Income,
               data = df,
@@ -160,7 +159,9 @@ p5 <- plot_ly(df,
 p5
 ```
 
-```{r Creating three box plots according to the Stage variable, grouped by country}
+We can even categorize the _x_-axis by the Country variable and then split each by the Stage variable using the `color = ` argument.
+
+```{r Creating three box plots according to the Stage variable after splitting by Country, message=FALSE, warning=FALSE}
 p6 <- plot_ly(df,
               x = ~Country,
               y = ~Income,
@@ -218,7 +219,7 @@ p8
 
 There are many color sets to choose from.  Here we use `Set(3)`.
 
-```{r Coosing a color set}
+```{r Choosing a color set}
 p7 <- plot_ly(type = "box",
               y = ~Income,
               color = ~Country,
@@ -233,4 +234,6 @@ p7 <- plot_ly(type = "box",
 p7
 ```
 
+## Conclusion
 
+Creating box-and-whisker plots are easy using `Plotly` for R.  It is a good way to show the spread of numerical data point values based on a categorical variable.
